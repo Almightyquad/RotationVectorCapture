@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">RotationVectorMoCap</string>
+    <string name="x">xRotation</string>
+    <string name="y">yRotation</string>
+    <string name="z">zRotation</string>
+    <string name="w">wRotation</string>
 </resources>

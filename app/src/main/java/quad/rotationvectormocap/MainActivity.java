@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 0;
     private static final int MY_PERMISSIONS_READ_EXTERNAL_STORAGE = 1;
     Context activity;
+    int fileNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,31 +73,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         final Button saveButton = findViewById(R.id.savetofilebutton);
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //I find the really verboseness of android studio to be really stupid.
-                if (ActivityCompat.checkSelfPermission(activity,Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(activity,Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-                {
-                    try {
-                        //myFile.createNewFile("RecordedData.txt");
+                if (!recording) {
+                    //I find the really verboseness of android studio to be really stupid.
+                    if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                        try {
+                            //myFile.createNewFile("RecordedData.txt");
 
-                        File myFile = new File("sdcard/DCIM/recordedMoCapData.txt");
-                        //path.mkdirs();
-                        FileOutputStream fOut = new FileOutputStream(myFile);
-                        OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-                        myOutWriter.append(recordedData);
-                        myOutWriter.close();
-                        fOut.close();
-                        Toast.makeText(v.getContext(), "Done writing SD 'recordedMoCapData.txt'", Toast.LENGTH_SHORT).show();
-                        recordedData = "";
-                    } catch (Exception e) {
-                        Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            File myFile = new File("sdcard/DCIM/recordedMoCapData"+ fileNumber + ".txt");
+                            //path.mkdirs();
+                            FileOutputStream fOut = new FileOutputStream(myFile);
+                            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                            myOutWriter.append(recordedData);
+                            myOutWriter.close();
+                            fOut.close();
+                            Toast.makeText(v.getContext(), "Done writing SD 'recordedMoCapData" + fileNumber + ".txt'", Toast.LENGTH_SHORT).show();
+                            fileNumber++;
+                            recordedData = "";
+                        } catch (Exception e) {
+                            Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        requestStoragePermission();
                     }
+
                 }
                 else
                 {
-                    requestStoragePermission();
+                    Toast.makeText(v.getContext(), "You have to stop recording to save to file.", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 
@@ -121,9 +127,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
         {
             //Calendar calendar = Calendar.;
+            //Log.v("SDCARD", Environment.getExternalStorageDirectory().getAbsolutePath() + "/");
             String string = String.format("%.4f,%.4f,%.4f,%.4f" + " timestamp: " + Calendar.getInstance().getTimeInMillis() + "\n", event.values[0], event.values[1], event.values[2], event.values[3], event.values[4]);
-            //Log.v("EventValues", string);
-            //Log.v("EventValues", event.values[0] + "\t\t" + event.values[1] + "\t\t" + event.values[2] + "      Len: " + event.values.length);
+            ((TextView)findViewById(R.id.xRotation)).setText("X: " + event.values[0]);
+            ((TextView)findViewById(R.id.yRotation)).setText("Y: " + event.values[1]);
+            ((TextView)findViewById(R.id.zRotation)).setText("Z: " + event.values[2]);
+            ((TextView)findViewById(R.id.wRotation)).setText("W: " + event.values[3]);
+
             if (recording)
             {
                 recordedData = recordedData + string;
@@ -135,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
      * Requests the {@link android.Manifest.permission_group#STORAGE} permission.
      * If an additional rationale should be displayed, the user has to launch the request from
      * a SnackBar that includes additional information.
+     *
+     * Also, this is so fucking unnecessary, why not just make it into a method with a standard format.
      */
     private void requestStoragePermission() {
         // Permission has not been granted and must be requested.
@@ -143,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Provide an additional rationale to the user if the permission was not granted
             // and the user would benefit from additional context for the use of the permission.
             // Display a SnackBar with a button to request the missing permission.
-            Snackbar.make(layout, "Camera access is required to display the camera preview.",
+            Snackbar.make(layout, "Need access to write to the SD card.",
                     Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -156,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         } else {
             Snackbar.make(layout,
-                    "Permission is not available. Requesting camera permission.",
+                    "Permission is not available. Requesting write permission.",
                     Snackbar.LENGTH_SHORT).show();
             // Request the permission. The result will be received in onRequestPermissionResult().
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -169,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Provide an additional rationale to the user if the permission was not granted
             // and the user would benefit from additional context for the use of the permission.
             // Display a SnackBar with a button to request the missing permission.
-            Snackbar.make(layout, "Camera access is required to display the camera preview.",
+            Snackbar.make(layout, "Need access to read the SD Card.",
                     Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -182,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         } else {
             Snackbar.make(layout,
-                    "Permission is not available. Requesting camera permission.",
+                    "Permission is not available. Requesting read permission.",
                     Snackbar.LENGTH_SHORT).show();
             // Request the permission. The result will be received in onRequestPermissionResult().
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},

@@ -33,4 +33,41 @@
         app:layout_constraintLeft_toLeftOf="parent" />
 
 
+    <TextView
+        android:id="@+id/xRotation"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:text="@string/x"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+
+        />
+
+    <TextView
+        android:id="@+id/yRotation"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:text="@string/y"
+        app:layout_constraintTop_toBottomOf="@+id/xRotation"/>
+
+    <TextView
+        android:id="@+id/zRotation"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:text="@string/z"
+        app:layout_constraintTop_toBottomOf="@+id/yRotation"/>
+
+    <TextView
+        android:id="@+id/wRotation"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:text="@string/w"
+        app:layout_constraintTop_toBottomOf="@+id/zRotation"/>
+
+
 </android.support.constraint.ConstraintLayout>

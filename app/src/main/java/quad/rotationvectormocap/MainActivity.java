@@ -24,8 +24,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Calendar;
-
-public class MainActivity extends AppCompatActivity implements SensorEventListener, ActivityCompat.OnRequestPermissionsResultCallback {
+//SensorEventListener for sensor method overriding. ActivityCompat.OnRequestPermissionsResultCallback for button callback method overriding
+public class MainActivity extends AppCompatActivity implements SensorEventListener, ActivityCompat.OnRequestPermissionsResultCallback 
+{
 
     SensorManager sensorManager;
     Sensor rotationVectorSensor;
@@ -38,20 +39,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     int fileNumber = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) 
+	{
         super.onCreate(savedInstanceState);
         activity = this;
         //Get an instance of the sensormanager
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+		//Get an instance of Rotation Vector Sensor
         rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         setContentView(R.layout.activity_main);
         layout = findViewById(R.id.main_layout);
-        /*if(ContextCompat.checkSelfPermission(this, Manifest.permission_group.STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission_group.STORAGE}, MY_PERMISSIONS_REQUEST_STORAGE);
-            Log.v("RAN", "YEP");
-        }*/
         //Just adds a button to be able to decide when to record and not.
         final Button recordButton = findViewById(R.id.recordbutton);
         recordButton.setOnClickListener(new View.OnClickListener()
@@ -70,18 +68,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             }
         });
+		//A save button is always nice
         final Button saveButton = findViewById(R.id.savetofilebutton);
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (!recording) {
+                if (!recording) 
+				{
                     //I find the really verboseness of android studio to be really stupid.
+					//If we have permission to read and write
                     if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                            && ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                        try {
-                            //myFile.createNewFile("RecordedData.txt");
-
+                            && ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) 
+							{
+                        try 
+						{
                             File myFile = new File("sdcard/DCIM/recordedMoCapData"+ fileNumber + ".txt");
-                            //path.mkdirs();
                             FileOutputStream fOut = new FileOutputStream(myFile);
                             OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
                             myOutWriter.append(recordedData);
@@ -90,10 +90,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             Toast.makeText(v.getContext(), "Done writing SD 'recordedMoCapData" + fileNumber + ".txt'", Toast.LENGTH_SHORT).show();
                             fileNumber++;
                             recordedData = "";
-                        } catch (Exception e) {
+                        } 
+						catch (Exception e) 
+						{
                             Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    } else {
+                    } 
+					//Else we ask for permission
+					else 
+					{
                         requestStoragePermission();
                     }
 
@@ -126,14 +131,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
         {
-            //Calendar calendar = Calendar.;
-            //Log.v("SDCARD", Environment.getExternalStorageDirectory().getAbsolutePath() + "/");
+			//Adds the sensor data to a string in the format: "x,y,z,w timestamp: time\n"
             String string = String.format("%.4f,%.4f,%.4f,%.4f" + " timestamp: " + Calendar.getInstance().getTimeInMillis() + "\n", event.values[0], event.values[1], event.values[2], event.values[3], event.values[4]);
             ((TextView)findViewById(R.id.xRotation)).setText("X: " + event.values[0]);
             ((TextView)findViewById(R.id.yRotation)).setText("Y: " + event.values[1]);
             ((TextView)findViewById(R.id.zRotation)).setText("Z: " + event.values[2]);
             ((TextView)findViewById(R.id.wRotation)).setText("W: " + event.values[3]);
-
+			//If we are recording we start stuffing the recordedData string with the sensor event data
             if (recording)
             {
                 recordedData = recordedData + string;
@@ -142,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     /**
-     * Requests the {@link android.Manifest.permission_group#STORAGE} permission.
+     * Requests the {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} and {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.
      * If an additional rationale should be displayed, the user has to launch the request from
      * a SnackBar that includes additional information.
      *
